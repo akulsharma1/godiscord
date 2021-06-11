@@ -2,14 +2,12 @@ package godiscord
 
 import (
 	"time"
-	"fmt"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
 	"strings"
-	"io/ioutil"
 	"math/rand"
 )
 
@@ -153,23 +151,15 @@ func (e *Embed) SendToWebhook(Webhook string) error {
 	if postErr != nil {
 		return postErr
 	}
-	defer req.Body.Close()
-	pJson, _ := ioutil.ReadAll(req.Body)
-	fmt.Println(string(pJson))
-	fmt.Println("**********")
-	fmt.Println(req.StatusCode)
-	fmt.Println("*******")
 	loop:
 	for {
-		if(strings.Contains(string(pJson), "rate limit")) {
+		if req.StatusCode == 429 || req.StatusCode == 401 || req.StatusCode == 403 {
 			time.Sleep( time.Duration((rand.Intn(500-150) + 150)) * time.Millisecond)
 			req2, postErr2 := http.Post(Webhook, "application/json", bytes.NewBuffer(embed))
 			if postErr2 != nil {
 				return postErr2
 			}
-			defer req2.Body.Close()
-			pJson, _ := ioutil.ReadAll(req2.Body)
-			if strings.Contains(string(pJson), "rate limit") {
+			if req2.StatusCode == 429 || req2.StatusCode == 401 || req2.StatusCode == 403 {
 
 			} else {
 				break loop
