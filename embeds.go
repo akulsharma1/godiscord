@@ -1,6 +1,7 @@
 package godiscord
 
 import (
+	"time"
 	"fmt"
 	"bytes"
 	"encoding/json"
@@ -154,5 +155,13 @@ func (e *Embed) SendToWebhook(Webhook string) error {
 	defer req.Body.Close()
 	pJson, _ := ioutil.ReadAll(req.Body)
 	fmt.Println(string(pJson))
+	if(strings.Contains(string(pJson), "rate limit")) {
+		time.Sleep(400*time.Millisecond)
+		_, postErr2 := http.Post(Webhook, "application/json", bytes.NewBuffer(embed))
+		if postErr2 != nil {
+			return postErr2
+		}
+	}
+	
 	return nil
 }
