@@ -1,14 +1,14 @@
 package godiscord
 
 import (
-	"fmt"
+	//"fmt"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
 	"strings"
-	"io/ioutil"
+	//"io/ioutil"
 )
 
 //Embed is a struct representing a Discord embed object
@@ -140,18 +140,18 @@ func (e *Embed) AddField(Name, Value string, Inline bool) error {
 
 //SendToWebhook sents the Embed to a webhook.
 //Returns error if embed was invalid or there was an error posting to the webhook.
+
 func (e *Embed) SendToWebhook(Webhook string) error {
 	embed, marshalErr := json.Marshal(e)
 	if marshalErr != nil {
 		return marshalErr
 	}
 
-	req, postErr := http.NewRequest(Webhook, "application/json", bytes.NewBuffer(embed))
+	_, postErr := http.NewRequest(Webhook, "application/json", bytes.NewBuffer(embed))
 	if postErr != nil {
 		return postErr
 	}
-	defer req.Body.Close()
-	pJson, _ := ioutil.ReadAll(req.Body)
-	fmt.Println(string(pJson))
+	//defer req.Body.Close()
+	//pJson, _ := ioutil.ReadAll(req.Body)
 	return nil
 }
