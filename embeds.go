@@ -156,13 +156,29 @@ func (e *Embed) SendToWebhook(Webhook string) error {
 	defer req.Body.Close()
 	pJson, _ := ioutil.ReadAll(req.Body)
 	fmt.Println(string(pJson))
-	if(strings.Contains(string(pJson), "rate limit")) {
-		time.Sleep( time.Duration((rand.Intn(400-100) + 100)) * time.Millisecond)
-		_, postErr2 := http.Post(Webhook, "application/json", bytes.NewBuffer(embed))
-		if postErr2 != nil {
-			return postErr2
+	fmt.Println("**********")
+	fmt.Println(req.StatusCode)
+	fmt.Println("*******")
+	loop:
+	for {
+		if(strings.Contains(string(pJson), "rate limit")) {
+			time.Sleep( time.Duration((rand.Intn(500-150) + 150)) * time.Millisecond)
+			req2, postErr2 := http.Post(Webhook, "application/json", bytes.NewBuffer(embed))
+			if postErr2 != nil {
+				return postErr2
+			}
+			defer req2.Body.Close()
+			pJson, _ := ioutil.ReadAll(req2.Body)
+			if strings.Contains(string(pJson), "rate limit") {
+
+			} else {
+				break loop
+			}
+		} else {
+			break loop
 		}
 	}
+	
 	
 	return nil
 }
