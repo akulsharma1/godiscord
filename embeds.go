@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"io/ioutil"
+	"math/rand"
 )
 
 //Embed is a struct representing a Discord embed object
@@ -156,7 +157,7 @@ func (e *Embed) SendToWebhook(Webhook string) error {
 	pJson, _ := ioutil.ReadAll(req.Body)
 	fmt.Println(string(pJson))
 	if(strings.Contains(string(pJson), "rate limit")) {
-		time.Sleep(400*time.Millisecond)
+		time.Sleep( time.Duration((rand.Intn(400-100) + 100)) * time.Millisecond)
 		_, postErr2 := http.Post(Webhook, "application/json", bytes.NewBuffer(embed))
 		if postErr2 != nil {
 			return postErr2
