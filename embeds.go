@@ -1,14 +1,14 @@
 package godiscord
 
 import (
-	"time"
 	"bytes"
 	"encoding/json"
 	"errors"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
-	"math/rand"
+	"time"
 )
 
 //Embed is a struct representing a Discord embed object
@@ -141,34 +141,24 @@ func (e *Embed) AddField(Name, Value string, Inline bool) error {
 //SendToWebhook sents the Embed to a webhook.
 //Returns error if embed was invalid or there was an error posting to the webhook.
 
-func (e *Embed) SendToWebhook(Webhook string) error {
+func (e *Embed) SendToWebhook(Webhook string) (error) {
 	embed, marshalErr := json.Marshal(e)
 	if marshalErr != nil {
 		return marshalErr
 	}
 
-	req, postErr := http.Post(Webhook, "application/json", bytes.NewBuffer(embed))
-	if postErr != nil {
-		return postErr
-	}
-	loop:
+	counter := 0
 	for {
-		if req.StatusCode == 429 || req.StatusCode == 401 || req.StatusCode == 403 {
-			time.Sleep( time.Duration((rand.Intn(500-150) + 150)) * time.Millisecond)
-			req2, postErr2 := http.Post(Webhook, "application/json", bytes.NewBuffer(embed))
-			if postErr2 != nil {
-				return postErr2
-			}
-			if req2.StatusCode == 429 || req2.StatusCode == 401 || req2.StatusCode == 403 {
+		if counter > 10 {return nil} // don't want to create too many webhook sending threads
 
-			} else {
-				break loop
-			}
-		} else {
-			break loop
+		req, postErr := http.Post(Webhook, "application/json", bytes.NewBuffer(embed))
+		if postErr != nil {
+			return postErr
 		}
+		if req.StatusCode >= 200 && req.StatusCode < 300 { // discord has a couple successful status codes
+			return nil
+		}
+		time.Sleep( time.Duration((rand.Intn(500-150) + 150)) * time.Millisecond)
+		counter++
 	}
-	
-	
-	return nil
 }
